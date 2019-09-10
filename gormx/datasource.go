@@ -5,28 +5,16 @@ import (
 
 	"github.com/jinzhu/gorm"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
 )
 
 var db *gorm.DB
 var dbOnce sync.Once
 
-type DatasourceConf struct {
-	Dialect string
-	ConnURL string
-}
-
-type Config interface {
-	Config() (DatasourceConf, error)
-}
-
-func Datasource(c Config) *gorm.DB {
+func Datasource() *gorm.DB {
 	dbOnce.Do(func() {
 		var err error
-		conf, err := c.Config()
-		if err != nil {
-			log.Fatal().Msgf("Failed to get config %s", err.Error())
-		}
-		db, err = gorm.Open(conf.Dialect, conf.ConnURL)
+		db, err = gorm.Open(viper.GetString("database.dialect"), viper.GetString("database.url"))
 		if err != nil {
 			log.Fatal().Msgf("Failed to connect database. Error: %s", err.Error())
 		}
