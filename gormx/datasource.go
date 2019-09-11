@@ -12,17 +12,19 @@ var db *gorm.DB
 var dbOnce sync.Once
 
 func Datasource() *gorm.DB {
-	dbOnce.Do(func() {
-		var err error
-		db, err = gorm.Open(viper.GetString("database.dialect"), viper.GetString("database.url"))
-		if err != nil {
-			log.Fatal().Msgf("Failed to connect database. Error: %s", err.Error())
-		}
+	if db == nil {
+		dbOnce.Do(func() {
+			var err error
+			db, err = gorm.Open(viper.GetString("database.dialect"), viper.GetString("database.url"))
+			if err != nil {
+				log.Fatal().Msgf("Failed to connect database. Error: %s", err.Error())
+			}
 
-		if err := db.DB().Ping(); err != nil {
-			log.Fatal().Msgf("Failed to connect database. Error: %s", err.Error())
-		}
-	})
+			if err := db.DB().Ping(); err != nil {
+				log.Fatal().Msgf("Failed to connect database. Error: %s", err.Error())
+			}
+		})
+	}
 	return db
 }
 
